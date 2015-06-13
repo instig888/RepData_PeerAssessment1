@@ -27,6 +27,22 @@ library(dplyr)
 ```
 
 ```r
+library(lubridate)
+```
+
+```
+## 
+## Attaching package: 'lubridate'
+## 
+## The following objects are masked from 'package:data.table':
+## 
+##     hour, mday, month, quarter, wday, week, yday, year
+```
+
+```r
+library(lattice)
+library(ggplot2)
+
 zipfile <- "activity.zip"
 datafile <- "activity.csv"
 
@@ -40,7 +56,7 @@ if(!file.exists(datafile))
           
 }
 
-stepDataRaw <- read.csv(datafile)
+stepDataRaw <- read.csv(datafile, stringsAsFactors=FALSE)
 
 ## Create a variable for only the complete cases of the data.
 stepsComp <- stepDataRaw[complete.cases(stepDataRaw),]
@@ -64,7 +80,7 @@ meanSteps1 <- as.integer(mean(stepsPerDay$Total.Steps))
 medianSteps1 <- as.integer(median(stepsPerDay$Total.Steps))
 ```
 
-### Calculate and report the mean and median of the total number of steps taken per day
+### Mean and median of the total number of steps taken per day
 Average Number of Steps Per Day: 10766  
 Median Number of Steps Per Day: 10765
 
@@ -128,7 +144,7 @@ meanSteps2 <- as.integer(mean(newStepsPerDay$Total.Steps))
 medianSteps2 <- as.integer(median(newStepsPerDay$Total.Steps))
 ```
 
-### Calculate and report the mean and median of the total number of steps taken per day
+### Mean and median of the total number of steps taken per day
 Average Number of Steps Per Day (accounting for bias): 9429  
 Median Number of Steps Per Day (accounting for bias): 10395
 
@@ -137,10 +153,16 @@ Median Number of Steps Per Day (accounting for bias): 10395
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-Are there differences in activity patterns between weekdays and weekends?
-
-For this part the weekdays() function may be of some help here. Use the dataset with the filled-in missing values for this part.
 
 Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+```r
+factoredData <- mutate(stepDataRaw, newdate=as.factor(ifelse(wday(strptime(date,"%Y-%m-%d")) %in% 2:6, "WEEKDAY", "WEEKEND")))
+
+# ggplot() + geom_line(data=factoredData, aes(x=interval, y=steps)) + facet_grid(. ~ newdate)
+
+factoredSummarized <- summarize(group_by(factoredData, newdate, interval), mean(steps))
+ggplot() + geom_line(data=factoredSummarized, aes(x=interval, y=factoredSummarized$mean)) + facet_grid(. ~ newdate)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-7-1.png) 

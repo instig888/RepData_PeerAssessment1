@@ -12,6 +12,8 @@ output:
 library(data.table)
 library(dplyr)
 library(lubridate)
+library(lattice)
+library(ggplot2)
 
 zipfile <- "activity.zip"
 datafile <- "activity.csv"
@@ -114,9 +116,10 @@ Median Number of Steps Per Day (accounting for bias): `r medianSteps2`
 
 Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 ```{r}
-factoredData = mutate(stepDataRaw, newdate=as.factor(ifelse(wday(strptime(date,"%Y-%m-%d")) %in% 2:6, "WEEKDAY", "WEEKEND")))
+factoredData <- mutate(stepDataRaw, newdate=as.factor(ifelse(wday(strptime(date,"%Y-%m-%d")) %in% 2:6, "WEEKDAY", "WEEKEND")))
 
+# ggplot() + geom_line(data=factoredData, aes(x=interval, y=steps)) + facet_grid(. ~ newdate)
+
+factoredSummarized <- summarize(group_by(factoredData, newdate, interval), mean(steps))
+ggplot() + geom_line(data=factoredSummarized, aes(x=interval, y=factoredSummarized$mean)) + facet_grid(. ~ newdate)
 ```
-
-
-Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
